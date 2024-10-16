@@ -26,12 +26,43 @@
       // Drawing a blue rectangle
       ctx.fillStyle = "blue";
       ctx.fillRect(50, 50, 200, 100); // x=50, y=50, width=200, height=100
+      
+      // the oteher rectangle 
+      ctx.fillStyle = 'green'; // Set the fill color to green
+      ctx.fillRect(300, 50, 150, 75); // Draw a green rectangle (x, y, width, height)
+
 
       // Drawing a red circle
       ctx.beginPath();
       ctx.arc(400, 200, 50, 0, 2 * Math.PI); // x=400, y=200, radius=50
       ctx.fillStyle = "red";
       ctx.fill();
+
+      // Drawing a quarter circle
+      ctx.beginPath();
+      ctx.arc(150, 300, 50, 0, 0.5 * Math.PI); // x, y, radius, start angle, end angle
+      ctx.fillStyle = 'rgba(0, 0, 255, 0.5)'; // 50% transparent blue
+      ctx.fill();
+      ctx.stroke();
+
+      // Drawing an arc (a line connecting two points on the circle's edge)
+      ctx.beginPath();
+      ctx.arc(350, 300, 50, 0, Math.PI / 2); // A quarter arc from 0 to PI/2
+      ctx.strokeStyle = 'green';
+      ctx.lineWidth = 4;  // Change stroke width to make it more visible
+      ctx.stroke();
+
+      // Drawing a full circle with a different stroke and fill
+      ctx.beginPath();
+      ctx.arc(450, 150, 40, 0, 2 * Math.PI); 
+      ctx.fillStyle = 'orange';
+      ctx.fill();
+      ctx.strokeStyle = 'black';
+      ctx.stroke();
+
+      ctx.font = '30px Arial';
+      ctx.fillStyle = 'black';
+      ctx.fillText('Gael Kayombo', 50, 350);
 		
     </script>
 

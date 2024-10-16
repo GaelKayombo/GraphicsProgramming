@@ -7,6 +7,9 @@
     <title>Canvas</title>
 
     <style type="text/css">
+      canvas{
+        border: 2px solid black; /* this is my boarder around the canvas*/
+      }
 	
     </style>
 
@@ -14,18 +17,21 @@
 
   <body>
 
-    <canvas id="canvasOne"></canvas>
+    <canvas id="myCanvas" width="600" height="400"></canvas>
 
     <script type="text/javascript">
-		// Gets a handle to the element with id canvasOne.
-		
-		// Set the canvas up for drawing in 2D.
-		
-		// Set the fill colour to bright red.
-		
-		// Create a filled rectangle 
-		
-	  
+		  var canvas = document.getElementById("myCanvas");
+      var ctx = canvas.getContext("2d");
+
+      // Drawing a blue rectangle
+      ctx.fillStyle = "blue";
+      ctx.fillRect(50, 50, 200, 100); // x=50, y=50, width=200, height=100
+
+      // Drawing a red circle
+      ctx.beginPath();
+      ctx.arc(400, 200, 50, 0, 2 * Math.PI); // x=400, y=200, radius=50
+      ctx.fillStyle = "red";
+      ctx.fill();
 		
     </script>
 

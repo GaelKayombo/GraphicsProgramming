@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lab 4 - Paddle and Ball</title>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600" style="border:1px solid black;"></canvas>
+    <script>
+        // Main canvas and context setup
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Ball and paddle setup
+        let ball = { x: 400, y: 300, radius: 10, dx: 3, dy: -3, color: "blue" };
+        let paddle = { x: 370, y: 580, radius: 30, color: "green" };
+        let score = 0;
+
+        let balls = [ball]; // Advanced feature - array of balls
+
+        // Draw paddle (circle now)
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.arc(paddle.x, paddle.y, paddle.radius, 0, Math.PI * 2);
+            ctx.fillStyle = paddle.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Draw a ball
+        function drawBall(b) {
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+            ctx.fillStyle = b.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Detect collision for each ball and handle it
+        function detectCollision(b) {
+            const distX = b.x - paddle.x;
+            const distY = b.y - paddle.y;
+            const distance = Math.sqrt(distX * distX + distY * distY);
+
+            if (distance < b.radius + paddle.radius) {
+                b.dy = -b.dy; // Bounce back
+                score++;
+                displayMessage("Collision detected! Score: " + score);
+            }
+        }
+
+        // Show a message on the canvas
+        function displayMessage(msg) {
+            ctx.font = "20px Arial";
+            ctx.fillStyle = "red";
+            ctx.fillText(msg, canvas.width / 2 - 100, canvas.height / 2);
+            setTimeout(() => {
+                ctx.clearRect(canvas.width / 2 - 100, canvas.height / 2 - 20, 200, 30);
+            }, 750); // Clear message after 0.75 sec
+        }
+
+        // Handle double-click to add/remove balls
+        canvas.addEventListener("dblclick", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            let ballClicked = false;
+
+            balls = balls.filter((b) => {
+                const dist = Math.sqrt((mouseX - b.x) ** 2 + (mouseY - b.y) ** 2);
+                if (dist < b.radius) {
+                    ballClicked = true; // Remove ball
+                    return false;
+                }
+                return true;
+            });
+
+            if (!ballClicked) {
+                balls.push({
+                    x: mouseX,
+                    y: mouseY,
+                    radius: 10,
+                    dx: Math.random() * 4 - 2,
+                    dy: Math.random() * 4 - 2,
+                    color: "rgb(" + Math.random() * 255 + "," + Math.random() * 255 + "," + Math.random() * 255 + ")",
+                });
+            }
+        });
+
+        // Update all balls and redraw everything
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPaddle();
+
+            balls.forEach((b) => {
+                drawBall(b);
+                detectCollision(b);
+
+                b.x += b.dx;
+                b.y += b.dy;
+
+                // Wall collisions for each ball
+                if (b.x + b.dx > canvas.width - b.radius || b.x + b.dx < b.radius) {
+                    b.dx = -b.dx;
+                }
+                if (b.y + b.dy < b.radius) {
+                    b.dy = -b.dy;
+                }
+                if (b.y + b.dy > canvas.height - b.radius) {
+                    console.log("Game Over!");
+                    document.location.reload(); // Reload game
+                }
+            });
+
+            requestAnimationFrame(update);
+        }
+
+        update();
+    </script>
+</body>
+</html>

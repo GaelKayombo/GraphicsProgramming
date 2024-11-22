@@ -1,44 +1,126 @@
 <!DOCTYPE html>
-
 <html>
-
   <head>
     <meta charset="UTF-8">
-    <title>Canvas</title>
-
+    <title>Canvas - Advanced Interaction</title>
     <style type="text/css">
       canvas {
-        border: 1px solid grey; 
+        border: 1px solid grey;
       }
     </style>
-
   </head>
-
   <body>
-	<p>This is mouse.</p>
-
-    <canvas id="canvas-for-ball"></canvas>
-
+    <p>This is an advanced interaction example.</p>
+    <canvas id="canvas-for-ball" width="800" height="600"></canvas>
     <script type="text/javascript">
-      var noClicks = 0;
-      
-      // Gets a handle to the element with id canvasOne.
-      var canvas = document.getElementById("canvas-for-ball");
-      // Get a 2D context for the canvas.
-      var ctx = canvas.getContext("2d");
-      // Make the fill style red.
-      ctx.fillStyle = "rgb(255, 0, 0)";
-      
-      canvas.addEventListener("click", function(event) { 
+      const canvas = document.getElementById("canvas-for-ball");
+      const ctx = canvas.getContext("2d");
+
+      // Ball properties
+      let ball = {
+        x: canvas.width / 2,
+        y: 50,
+        radius: 10,
+        dy: 0, // Ball's vertical speed
+        gravity: 0.5, // Acceleration due to gravity
+        bounceFactor: 0.9, // Reduces bounce height each time
+      };
+
+      // Paddle setup
+      class Paddle {
+        constructor(x, y, width, height, color) {
+          this.x = x;
+          this.y = y;
+          this.width = width;
+          this.height = height;
+          this.color = color;
+        }
+
+        draw(ctx) {
+          ctx.fillStyle = this.color;
+          ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+
+        move(dy) {
+          this.y += dy;
+        }
+      }
+
+      // Create paddles
+      const paddle1 = new Paddle(50, canvas.height / 2 - 30, 10, 60, "blue");
+      const paddle2 = new Paddle(canvas.width - 60, canvas.height / 2 - 30, 10, 60, "red");
+
+      // Rotating symbol setup
+      let angle = 0;
+      let spinSpeed = 0.05; // Initial speed of rotation
+
+      function drawSymbol(ctx, x, y, size) {
+        ctx.save(); // Save canvas state
+        ctx.translate(x, y); // Move origin to the symbol's position
+        ctx.rotate(angle); // Rotate the canvas
+        ctx.fillStyle = "purple";
+        ctx.fillRect(-size / 2, -size / 2, size, size); // Draw square
+        ctx.restore(); // Restore canvas state
+      }
+
+      function updateSymbol() {
+        angle += spinSpeed;
+        if (angle > 2 * Math.PI) angle = 0;
+      }
+
+      // Ball physics
+      function updateBall() {
+        ball.dy += ball.gravity;
+        ball.y += ball.dy;
+        if (ball.y + ball.radius >= canvas.height) {
+          ball.y = canvas.height - ball.radius; // Keep it above the floor
+          ball.dy = -ball.dy * ball.bounceFactor; // Reverse and reduce speed
+        }
+      }
+
+      function drawBall(ctx) {
         ctx.beginPath();
-        ctx.arc(50, 50, 6, 0, 2 * Math.PI);
+        ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = "red";
         ctx.fill();
-        
-        noClicks += 1;
-        console.log(noClicks);
+        ctx.closePath();
+      }
+
+      // Paddle controls
+      document.addEventListener("keydown", function (event) {
+        // Controls for paddle 1
+        if (event.key === "ArrowUp") paddle1.move(-5);
+        if (event.key === "ArrowDown") paddle1.move(5);
+
+        // Controls for paddle 2
+        if (event.key === "w" || event.key === "W") paddle2.move(-5);
+        if (event.key === "s" || event.key === "S") paddle2.move(5);
+
+        // Spin controls for the symbol
+        if (event.key === "a" || event.key === "A") spinSpeed -= 0.01;
+        if (event.key === "d" || event.key === "D") spinSpeed += 0.01;
       });
+
+      // Paddle 1 follows mouse movement
+      canvas.addEventListener("mousemove", function (event) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseY = event.clientY - rect.top;
+        paddle1.y = mouseY - paddle1.height / 2; // Center paddle on mouse
+      });
+
+      // Redraw everything
+      function updateCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        updateBall();
+        drawBall(ctx);
+        updateSymbol();
+        drawSymbol(ctx, canvas.width / 2, canvas.height / 2, 40);
+        paddle1.draw(ctx);
+        paddle2.draw(ctx);
+        requestAnimationFrame(updateCanvas); // Keep updating
+      }
+
+      updateCanvas(); // Start the animation loop
     </script>
-
   </body>
-
 </html>

@@ -6,18 +6,16 @@
 <body>
     <canvas id="gameCanvas" width="800" height="600" style="border:1px solid black;"></canvas>
     <script>
-        // Main canvas and context setup
+        // Setup canvas and context
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
         // Ball and paddle setup
         let ball = { x: 400, y: 300, radius: 10, dx: 3, dy: -3, color: "blue" };
         let paddle = { x: 370, y: 580, radius: 30, color: "green" };
-        let score = 0;
+        let collisionCount = 0; // Keep track of collisions
 
-        let balls = [ball]; // Advanced feature - array of balls
-
-        // Draw paddle (circle now)
+        // Draw the paddle (circle now)
         function drawPaddle() {
             ctx.beginPath();
             ctx.arc(paddle.x, paddle.y, paddle.radius, 0, Math.PI * 2);
@@ -26,96 +24,64 @@
             ctx.closePath();
         }
 
-        // Draw a ball
-        function drawBall(b) {
+        // Draw the ball
+        function drawBall() {
             ctx.beginPath();
-            ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-            ctx.fillStyle = b.color;
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = ball.color;
             ctx.fill();
             ctx.closePath();
         }
 
-        // Detect collision for each ball and handle it
-        function detectCollision(b) {
-            const distX = b.x - paddle.x;
-            const distY = b.y - paddle.y;
+        // Detect collision between ball and paddle
+        function detectCollision() {
+            const distX = ball.x - paddle.x;
+            const distY = ball.y - paddle.y;
             const distance = Math.sqrt(distX * distX + distY * distY);
 
-            if (distance < b.radius + paddle.radius) {
-                b.dy = -b.dy; // Bounce back
-                score++;
-                displayMessage("Collision detected! Score: " + score);
+            if (distance < ball.radius + paddle.radius) {
+                ball.dy = -ball.dy; // Bounce the ball
+                collisionCount++; // Increment collision count
             }
         }
 
-        // Show a message on the canvas
-        function displayMessage(msg) {
+        // Display collision count
+        function displayCollisionCount() {
             ctx.font = "20px Arial";
-            ctx.fillStyle = "red";
-            ctx.fillText(msg, canvas.width / 2 - 100, canvas.height / 2);
-            setTimeout(() => {
-                ctx.clearRect(canvas.width / 2 - 100, canvas.height / 2 - 20, 200, 30);
-            }, 750); // Clear message after 0.75 sec
+            ctx.fillStyle = "black";
+            ctx.fillText("Collisions: " + collisionCount, 10, 20); // Top-left corner
         }
 
-        // Handle double-click to add/remove balls
-        canvas.addEventListener("dblclick", (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
-
-            let ballClicked = false;
-
-            balls = balls.filter((b) => {
-                const dist = Math.sqrt((mouseX - b.x) ** 2 + (mouseY - b.y) ** 2);
-                if (dist < b.radius) {
-                    ballClicked = true; // Remove ball
-                    return false;
-                }
-                return true;
-            });
-
-            if (!ballClicked) {
-                balls.push({
-                    x: mouseX,
-                    y: mouseY,
-                    radius: 10,
-                    dx: Math.random() * 4 - 2,
-                    dy: Math.random() * 4 - 2,
-                    color: "rgb(" + Math.random() * 255 + "," + Math.random() * 255 + "," + Math.random() * 255 + ")",
-                });
-            }
-        });
-
-        // Update all balls and redraw everything
+        // Update everything
         function update() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
             drawPaddle();
+            drawBall();
+            displayCollisionCount();
+            detectCollision();
 
-            balls.forEach((b) => {
-                drawBall(b);
-                detectCollision(b);
+            // Move the ball
+            ball.x += ball.dx;
+            ball.y += ball.dy;
 
-                b.x += b.dx;
-                b.y += b.dy;
+            // Ball-wall collisions
+            if (ball.x + ball.dx > canvas.width - ball.radius || ball.x + ball.dx < ball.radius) {
+                ball.dx = -ball.dx;
+            }
+            if (ball.y + ball.dy < ball.radius) {
+                ball.dy = -ball.dy;
+            }
 
-                // Wall collisions for each ball
-                if (b.x + b.dx > canvas.width - b.radius || b.x + b.dx < b.radius) {
-                    b.dx = -b.dx;
-                }
-                if (b.y + b.dy < b.radius) {
-                    b.dy = -b.dy;
-                }
-                if (b.y + b.dy > canvas.height - b.radius) {
-                    console.log("Game Over!");
-                    document.location.reload(); // Reload game
-                }
-            });
+            // Game over if ball hits the bottom wall
+            if (ball.y + ball.dy > canvas.height - ball.radius) {
+                console.log("Game Over!"); // Log game over
+                document.location.reload(); // Reload page to restart
+            }
 
-            requestAnimationFrame(update);
+            requestAnimationFrame(update); // Repeat
         }
 
-        update();
+        update(); // Start the game loop
     </script>
 </body>
 </html>

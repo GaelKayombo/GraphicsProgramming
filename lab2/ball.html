@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Lab 3 - Animation Frames</title>
+    <title>Lab 2 - Animated Peace Sign Ball</title>
     <style type="text/css">
       canvas {
         border: 2px solid black;
@@ -10,28 +10,28 @@
     </style>
   </head>
   <body>
-    <h1>Ball</h1>
-    <canvas id="canvas-for-lab3" width="800" height="600"></canvas>
+    <h1>Peace Sign Animation</h1>
+    <canvas id="canvas-for-peace" width="800" height="600"></canvas>
     <script type="text/javascript">
-      const canvas = document.getElementById("canvas-for-lab3");
+      const canvas = document.getElementById("canvas-for-peace");
       const ctx = canvas.getContext("2d");
 
-      // Ball class with advanced functionality
+      // Ball class with peace sign
       class Ball {
         constructor(x, y, radius, xVelocity, yVelocity, color) {
           this.x = x;
           this.y = y;
           this.radius = radius;
-          this.xVelocity = xVelocity; // Horizontal velocity
-          this.yVelocity = yVelocity; // Vertical velocity
+          this.xVelocity = xVelocity; // Horizontal speed
+          this.yVelocity = yVelocity; // Vertical speed
           this.color = color;
-          this.angle = 0; // Rotation angle for peace sign
-          this.rotationSpeed = 0.05; // Rotation speed of peace sign
+          this.angle = 0; // Rotation angle for the peace sign
+          this.rotationSpeed = 0.05; // Speed of rotation
         }
 
-        // Draw the ball with the peace sign
+        // Draw the ball with peace sign
         draw() {
-          // Draw the ball
+          // Draw the ball (outer circle)
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
           ctx.fillStyle = this.color;
@@ -46,11 +46,11 @@
         drawPeaceSign() {
           ctx.save();
           ctx.translate(this.x, this.y); // Move origin to ball's center
-          ctx.rotate(this.angle); // Rotate the peace sign
+          ctx.rotate(this.angle); // Rotate peace sign
           ctx.lineWidth = 2;
           ctx.strokeStyle = "black";
 
-          // Peace sign outer circle
+          // Outer circle of the peace sign
           ctx.beginPath();
           ctx.arc(0, 0, this.radius - 10, 0, 2 * Math.PI);
           ctx.stroke();
@@ -75,19 +75,19 @@
           ctx.restore();
         }
 
-        // Update ball position and handle bouncing
+        // Move the ball and handle bouncing
         move() {
           this.x += this.xVelocity;
           this.y += this.yVelocity;
 
-          // Bounce off the canvas edges (vertical and horizontal)
+          // Bounce off walls
           if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
-            this.xVelocity = -this.xVelocity; // Reverse horizontal direction
+            this.xVelocity = -this.xVelocity; // Reverse direction
             this.reverseRotation(); // Reverse rotation on bounce
           }
 
           if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
-            this.yVelocity = -this.yVelocity; // Reverse vertical direction
+            this.yVelocity = -this.yVelocity; // Reverse direction
             this.reverseRotation(); // Reverse rotation on bounce
           }
 
@@ -95,7 +95,7 @@
           this.angle += this.rotationSpeed;
         }
 
-        // Reverse rotation direction on bounce
+        // Reverse rotation direction
         reverseRotation() {
           this.rotationSpeed = -this.rotationSpeed;
         }
@@ -103,8 +103,8 @@
 
       // Create the ball instance
       const ball = new Ball(
-        canvas.width / 2, // Starting X position
-        canvas.height / 2, // Starting Y position
+        canvas.width / 2,
+        canvas.height / 2,
         40, // Ball radius
         4, // Horizontal velocity
         3, // Vertical velocity
@@ -113,10 +113,10 @@
 
       // Animation loop
       function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-        ball.move(); // Update ball position
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+        ball.move(); // Move the ball
         ball.draw(); // Draw the ball
-        requestAnimationFrame(animate); // Keep animating
+        requestAnimationFrame(animate); // Loop
       }
 
       animate(); // Start the animation

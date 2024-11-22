@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Canvas - Advanced Interaction</title>
+    <title>Canvas - Beginner-Friendly Advanced Interaction</title>
     <style type="text/css">
       canvas {
         border: 1px solid grey;
@@ -23,7 +23,7 @@
         radius: 10,
         dy: 0,
         gravity: 0.5,
-        bounceFactor: 0.85, // Slightly more energy loss for realism
+        bounceFactor: 0.85,
       };
 
       // Paddle setup
@@ -49,34 +49,29 @@
       const paddle1 = new Paddle(50, canvas.height / 2 - 30, 10, 60, "blue");
       const paddle2 = new Paddle(canvas.width - 60, canvas.height / 2 - 30, 10, 60, "red");
 
-      // Girly rotating symbol
+      // Gradient circle setup
       let angle = 0;
       let spinSpeed = 0.05;
-      let wobble = 0; // For imperfection
-      let wobbleSpeed = 0.02;
 
-      function drawSymbol(ctx, x, y, size) {
+      function drawGradientCircle(ctx, x, y, size) {
+        // Create a radial gradient
+        const gradient = ctx.createRadialGradient(x, y, 5, x, y, size);
+        gradient.addColorStop(0, "pink");
+        gradient.addColorStop(0.5, "lightblue");
+        gradient.addColorStop(1, "purple");
+
         ctx.save();
         ctx.translate(x, y);
-        ctx.rotate(angle + wobble); // Add slight wobble to rotation
-        ctx.fillStyle = "pink";
+        ctx.rotate(angle); // Slight rotation for some motion
         ctx.beginPath();
-        for (let i = 0; i < 5; i++) {
-          const outerX = Math.cos((i * 2 * Math.PI) / 5) * size;
-          const outerY = Math.sin((i * 2 * Math.PI) / 5) * size;
-          const innerX = Math.cos(((i + 0.5) * 2 * Math.PI) / 5) * (size / 2);
-          const innerY = Math.sin(((i + 0.5) * 2 * Math.PI) / 5) * (size / 2);
-          ctx.lineTo(outerX, outerY);
-          ctx.lineTo(innerX, innerY);
-        }
-        ctx.closePath();
+        ctx.arc(0, 0, size, 0, 2 * Math.PI);
+        ctx.fillStyle = gradient;
         ctx.fill();
         ctx.restore();
       }
 
-      function updateSymbol() {
+      function updateGradientCircle() {
         angle += spinSpeed;
-        wobble = Math.sin(wobbleSpeed * Date.now() * 0.002) * 0.1; // Wobble effect
         if (angle > 2 * Math.PI) angle = 0;
       }
 
@@ -120,8 +115,8 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         updateBall();
         drawBall(ctx);
-        updateSymbol();
-        drawSymbol(ctx, canvas.width / 2, canvas.height / 2, 40);
+        updateGradientCircle();
+        drawGradientCircle(ctx, canvas.width / 2, canvas.height / 2, 40);
         paddle1.draw(ctx);
         paddle2.draw(ctx);
         requestAnimationFrame(updateCanvas);

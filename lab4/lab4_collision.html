@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Lab 4 - Paddle and Ball</title>
+    <title>Lab 4 - Paddle and Ball Collision</title>
 </head>
 <body>
     <canvas id="gameCanvas" width="800" height="600" style="border:1px solid black;"></canvas>
     <script>
-        // Setup canvas and context
+        // Canvas setup
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
-        // Ball and paddle setup
-        let ball = { x: 400, y: 300, radius: 10, dx: 3, dy: -3, color: "blue" };
-        let paddle = { x: 370, y: 580, radius: 30, color: "green" };
-        let collisionCount = 0; // Keep track of collisions
+        // Ball and Paddle settings
+        let ball = {
+            x: 400, y: 300, radius: 15, dx: 4, dy: -4, color: "red"
+        };
+        let paddle = {
+            x: 400, y: 580, radius: 30, color: "blue", score: 0
+        };
+        let collisionCount = 0;
 
-        // Draw the paddle (circle now)
+        // Draw the paddle as a circle
         function drawPaddle() {
             ctx.beginPath();
             ctx.arc(paddle.x, paddle.y, paddle.radius, 0, Math.PI * 2);
@@ -24,16 +28,24 @@
             ctx.closePath();
         }
 
-        // Draw the ball
+        // Draw the ball (with symbol from Lab 2/3)
         function drawBall() {
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
             ctx.fillStyle = ball.color;
             ctx.fill();
             ctx.closePath();
+            // Add a peace symbol in the ball for Lab 2/3 integration
+            ctx.beginPath();
+            ctx.moveTo(ball.x, ball.y - ball.radius / 2);
+            ctx.lineTo(ball.x, ball.y + ball.radius / 2);
+            ctx.moveTo(ball.x - ball.radius / 2, ball.y);
+            ctx.lineTo(ball.x + ball.radius / 2, ball.y);
+            ctx.strokeStyle = "white";
+            ctx.stroke();
         }
 
-        // Detect collision between ball and paddle
+        // Detect collision between paddle and ball
         function detectCollision() {
             const distX = ball.x - paddle.x;
             const distY = ball.y - paddle.y;
@@ -41,26 +53,37 @@
 
             if (distance < ball.radius + paddle.radius) {
                 ball.dy = -ball.dy; // Bounce the ball
-                collisionCount++; // Increment collision count
+                collisionCount++;
+                paddle.score++; // Increment paddle score
             }
         }
 
-        // Display collision count
-        function displayCollisionCount() {
+        // Display collision count and scores
+        function displayStats() {
             ctx.font = "20px Arial";
             ctx.fillStyle = "black";
-            ctx.fillText("Collisions: " + collisionCount, 10, 20); // Top-left corner
+            ctx.fillText("Collisions: " + collisionCount, 10, 20);
+            ctx.fillText("Paddle Score: " + paddle.score, 10, 50);
         }
 
-        // Update everything
+        // Update ball speed based on keyboard input (Lab 3)
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowUp") ball.dy -= 1;
+            if (e.key === "ArrowDown") ball.dy += 1;
+            if (e.key === "ArrowLeft") ball.dx -= 1;
+            if (e.key === "ArrowRight") ball.dx += 1;
+        });
+
+        // Update and draw everything
         function update() {
             ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+
             drawPaddle();
             drawBall();
-            displayCollisionCount();
+            displayStats();
             detectCollision();
 
-            // Move the ball
+            // Ball movement
             ball.x += ball.dx;
             ball.y += ball.dy;
 
@@ -72,13 +95,14 @@
                 ball.dy = -ball.dy;
             }
 
-            // Game over if ball hits the bottom wall
+            // If the ball hits the back wall, decrement the score
             if (ball.y + ball.dy > canvas.height - ball.radius) {
-                console.log("Game Over!"); // Log game over
-                document.location.reload(); // Reload page to restart
+                console.log("Ball missed!");
+                paddle.score--; // Lose score
+                document.location.reload(); // Restart game for now
             }
 
-            requestAnimationFrame(update); // Repeat
+            requestAnimationFrame(update); // Repeat the loop
         }
 
         update(); // Start the game loop

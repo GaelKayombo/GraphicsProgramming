@@ -1,50 +1,125 @@
-
 <!DOCTYPE html>
-
 <html>
-
   <head>
     <meta charset="UTF-8">
-    <title>Canvas</title>
-
+    <title>Lab 2 - Animated Peace Sign Ball</title>
     <style type="text/css">
-      body {
-          background-color: white;
+      canvas {
+        border: 2px solid black;
       }
     </style>
-
   </head>
-
   <body>
-
-    <canvas id="canvas-for-ball" width="400" height="300"></canvas>
-
+    <h1>Peace Sign Animation</h1>
+    <canvas id="canvas-for-peace" width="800" height="600"></canvas>
     <script type="text/javascript">
-      // Gets a handle to the element with id canvasOne.
-      var canvas = document.getElementById("canvas-for-ball");
-      // Get a 2D context for the canvas.
-      var ctx = canvas.getContext("2d");
-      
-      // The vertical location of the ball.
-      var y = 10;
-      // A function to repeat every time the animation loops.
-      function repeatme() {
-        ctx.clearRect(0,0, canvas.)
-        // Draw the ball (stroked, not filled).
-        ctx.beginPath();
-        ctx.arc(50, y, 3, 0, 2 * Math.PI);
-        ctx.stroke();
-        
-        // Update the y location.
-        y += 1;
-        
-        window.requestAnimationFrame(repeatme);
+      const canvas = document.getElementById("canvas-for-peace");
+      const ctx = canvas.getContext("2d");
+
+      // Ball class with peace sign
+      class Ball {
+        constructor(x, y, radius, xVelocity, yVelocity, color) {
+          this.x = x;
+          this.y = y;
+          this.radius = radius;
+          this.xVelocity = xVelocity; // Horizontal speed
+          this.yVelocity = yVelocity; // Vertical speed
+          this.color = color;
+          this.angle = 0; // Rotation angle for the peace sign
+          this.rotationSpeed = 0.05; // Speed of rotation
+        }
+
+        // Draw the ball with peace sign
+        draw() {
+          // Draw the ball (outer circle)
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+          ctx.closePath();
+
+          // Draw the peace sign
+          this.drawPeaceSign();
+        }
+
+        // Peace sign inside the ball
+        drawPeaceSign() {
+          ctx.save();
+          ctx.translate(this.x, this.y); // Move origin to ball's center
+          ctx.rotate(this.angle); // Rotate peace sign
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "black";
+
+          // Outer circle of the peace sign
+          ctx.beginPath();
+          ctx.arc(0, 0, this.radius - 10, 0, 2 * Math.PI);
+          ctx.stroke();
+
+          // Peace sign vertical line
+          ctx.beginPath();
+          ctx.moveTo(0, -this.radius + 10);
+          ctx.lineTo(0, this.radius - 10);
+          ctx.stroke();
+
+          // Peace sign diagonal lines
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(-this.radius * 0.7, this.radius * 0.7);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(this.radius * 0.7, this.radius * 0.7);
+          ctx.stroke();
+
+          ctx.restore();
+        }
+
+        // Move the ball and handle bouncing
+        move() {
+          this.x += this.xVelocity;
+          this.y += this.yVelocity;
+
+          // Bounce off walls
+          if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+            this.xVelocity = -this.xVelocity; // Reverse direction
+            this.reverseRotation(); // Reverse rotation on bounce
+          }
+
+          if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+            this.yVelocity = -this.yVelocity; // Reverse direction
+            this.reverseRotation(); // Reverse rotation on bounce
+          }
+
+          // Rotate the peace sign
+          this.angle += this.rotationSpeed;
+        }
+
+        // Reverse rotation direction
+        reverseRotation() {
+          this.rotationSpeed = -this.rotationSpeed;
+        }
       }
-      
-      // Get the animation going.
-      repeatme();
+
+      // Create the ball instance
+      const ball = new Ball(
+        canvas.width / 2,
+        canvas.height / 2,
+        40, // Ball radius
+        4, // Horizontal velocity
+        3, // Vertical velocity
+        "pink" // Ball color
+      );
+
+      // Animation loop
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+        ball.move(); // Move the ball
+        ball.draw(); // Draw the ball
+        requestAnimationFrame(animate); // Loop
+      }
+
+      animate(); // Start the animation
     </script>
-
   </body>
-
 </html>

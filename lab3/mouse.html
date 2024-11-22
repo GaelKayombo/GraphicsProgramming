@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Lab 3 - Advanced Peace Sign Ball</title>
+    <title>Mouse Interaction</title>
     <style type="text/css">
       canvas {
         border: 2px solid black;
@@ -10,120 +10,31 @@
     </style>
   </head>
   <body>
-    <h1>Advanced Peace Sign Animation</h1>
-    <canvas id="canvas-for-lab3" width="800" height="600"></canvas>
+    <h1>Mouse Interaction</h1>
+    <canvas id="canvas-for-mouse" width="800" height="600"></canvas>
     <script type="text/javascript">
-      const canvas = document.getElementById("canvas-for-lab3");
+      const canvas = document.getElementById("canvas-for-mouse");
       const ctx = canvas.getContext("2d");
 
-      // Ball class with advanced functionality
-      class Ball {
-        constructor(x, y, radius, xVelocity, yVelocity, color) {
-          this.x = x;
-          this.y = y;
-          this.radius = radius;
-          this.xVelocity = xVelocity;
-          this.yVelocity = yVelocity;
-          this.color = color;
-          this.angle = 0;
-          this.rotationSpeed = 0.05;
-        }
+      // Counter for the number of clicks
+      let clickCount = 0;
 
-        // Draw the ball with the peace sign
-        draw() {
-          // Draw the ball
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-          ctx.fillStyle = this.color;
-          ctx.fill();
-          ctx.closePath();
+      // Add event listener for mouse clicks
+      canvas.addEventListener("click", function (event) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left; // Adjust mouse X for canvas position
+        const mouseY = event.clientY - rect.top;  // Adjust mouse Y for canvas position
 
-          // Draw the peace sign
-          this.drawPeaceSign();
-        }
+        // Draw a small red dot at the mouse position
+        ctx.beginPath();
+        ctx.arc(mouseX, mouseY, 6, 0, 2 * Math.PI);
+        ctx.fillStyle = "red";
+        ctx.fill();
 
-        // Peace sign using polar coordinates
-        drawPeaceSign() {
-          ctx.save();
-          ctx.translate(this.x, this.y);
-          ctx.rotate(this.angle);
-
-          ctx.strokeStyle = "black";
-          ctx.lineWidth = 2;
-
-          // Outer circle
-          ctx.beginPath();
-          ctx.arc(0, 0, this.radius - 10, 0, 2 * Math.PI);
-          ctx.stroke();
-
-          // Vertical line
-          this.drawPolarLine(0, this.radius - 10, Math.PI / 2); // Top to bottom
-
-          // Diagonal lines
-          this.drawPolarLine(0, this.radius - 10, (3 * Math.PI) / 4); // Left
-          this.drawPolarLine(0, this.radius - 10, Math.PI / 4); // Right
-
-          ctx.restore();
-        }
-
-        // Utility function to draw polar lines
-        drawPolarLine(startRadius, endRadius, angle) {
-          const startX = startRadius * Math.cos(angle);
-          const startY = startRadius * Math.sin(angle);
-          const endX = endRadius * Math.cos(angle);
-          const endY = endRadius * Math.sin(angle);
-
-          ctx.beginPath();
-          ctx.moveTo(startX, startY);
-          ctx.lineTo(endX, endY);
-          ctx.stroke();
-        }
-
-        // Update ball position and rotation
-        move() {
-          this.x += this.xVelocity;
-          this.y += this.yVelocity;
-
-          // Bounce off the edges
-          if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
-            this.xVelocity = -this.xVelocity; // Reverse horizontal direction
-            this.reverseRotation(); // Reverse rotation
-          }
-
-          if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
-            this.yVelocity = -this.yVelocity; // Reverse vertical direction
-            this.reverseRotation(); // Reverse rotation
-          }
-
-          // Rotate the peace sign
-          this.angle += this.rotationSpeed;
-        }
-
-        // Reverse rotation direction
-        reverseRotation() {
-          this.rotationSpeed = -this.rotationSpeed;
-        }
-      }
-
-      // Create the ball instance
-      const ball = new Ball(
-        canvas.width / 2, // Starting X position
-        canvas.height / 2, // Starting Y position
-        40, // Ball radius
-        4, // Horizontal velocity
-        3, // Vertical velocity
-        "pink" // Ball color
-      );
-
-      // Animation loop
-      function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-        ball.move(); // Update ball position
-        ball.draw(); // Draw the ball
-        requestAnimationFrame(animate); // Keep animating
-      }
-
-      animate(); // Start the animation
+        // Increment and log the number of clicks
+        clickCount++;
+        console.log(`Mouse clicked at (${mouseX}, ${mouseY}). Total clicks: ${clickCount}`);
+      });
     </script>
   </body>
 </html>

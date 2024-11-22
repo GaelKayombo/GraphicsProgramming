@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Lab 4 - Collisions and Advanced Features</title>
+    <title>Lab 4 - Collision</title>
 </head>
 <body>
     <canvas id="gameCanvas" width="800" height="600" style="border:1px solid black;"></canvas>
@@ -29,7 +29,7 @@
                 ctx.fill();
                 ctx.closePath();
 
-                // Advanced symbol: Peace sign
+                // Peace sign (advanced symbol)
                 ctx.beginPath();
                 ctx.moveTo(this.x, this.y - this.radius + 3);
                 ctx.lineTo(this.x, this.y + this.radius - 3);
@@ -49,16 +49,27 @@
             }
 
             bounceWall() {
+                // Bounce horizontally on canvas walls
                 if (this.x + this.dx > canvas.width - this.radius || this.x + this.dx < this.radius) {
                     this.dx = -this.dx;
                 }
+
+                // Bounce vertically on top wall
                 if (this.y + this.dy < this.radius) {
                     this.dy = -this.dy;
                 }
             }
 
-            missed() {
-                return this.y + this.dy > canvas.height - this.radius;
+            resetIfMissed() {
+                // If ball hits the bottom wall, reset position
+                if (this.y + this.dy > canvas.height - this.radius) {
+                    this.x = canvas.width / 2;
+                    this.y = canvas.height / 2;
+                    this.dx = 3 * (Math.random() > 0.5 ? 1 : -1); // Randomize direction
+                    this.dy = -3;
+                    return true; // Signal reset
+                }
+                return false; // No reset
             }
         }
 
@@ -162,8 +173,8 @@
                     console.log("Collision detected!");
                 }
 
-                if (ball.missed()) {
-                    console.log("Missed a ball!");
+                if (ball.resetIfMissed()) {
+                    console.log("Missed a ball! Score decremented.");
                     paddle.score--; // Decrease score for missing a ball
                 }
             });

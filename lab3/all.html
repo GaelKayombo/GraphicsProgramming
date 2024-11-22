@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Lab 3 - Combined Interactions</title>
+    <title>Lab 3 - All Interactions</title>
     <style type="text/css">
       canvas {
         border: 2px solid black;
@@ -134,6 +134,7 @@
       );
 
       // Mouse interaction (draw a dot where clicked)
+      let clickCount = 0;
       canvas.addEventListener("click", function (event) {
         const rect = canvas.getBoundingClientRect();
         const mouseX = event.clientX - rect.left;
@@ -143,6 +144,9 @@
         ctx.arc(mouseX, mouseY, 6, 0, 2 * Math.PI);
         ctx.fillStyle = "red";
         ctx.fill();
+
+        clickCount++;
+        console.log(`Mouse clicked at (${mouseX}, ${mouseY}). Total clicks: ${clickCount}`);
       });
 
       // Keyboard controls for paddles

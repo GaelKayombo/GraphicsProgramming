@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Canvas - Beginner-Friendly Advanced Interaction</title>
+    <title>Canvas - Peace Sign Interaction</title>
     <style type="text/css">
       canvas {
         border: 1px solid grey;
@@ -10,7 +10,7 @@
     </style>
   </head>
   <body>
-    <p>This is an advanced interaction example.</p>
+    <p>This is an advanced interaction with a peace sign ball.</p>
     <canvas id="canvas-for-ball" width="800" height="600"></canvas>
     <script type="text/javascript">
       const canvas = document.getElementById("canvas-for-ball");
@@ -20,10 +20,12 @@
       let ball = {
         x: canvas.width / 2,
         y: 50,
-        radius: 10,
+        radius: 40, // Increased size for peace sign visibility
         dy: 0,
         gravity: 0.5,
         bounceFactor: 0.85,
+        angle: 0, // Rotation angle for the peace sign
+        spinSpeed: 0.05, // Peace sign rotation speed
       };
 
       // Paddle setup
@@ -49,48 +51,62 @@
       const paddle1 = new Paddle(50, canvas.height / 2 - 30, 10, 60, "blue");
       const paddle2 = new Paddle(canvas.width - 60, canvas.height / 2 - 30, 10, 60, "red");
 
-      // Gradient circle setup
-      let angle = 0;
-      let spinSpeed = 0.05;
-
-      function drawGradientCircle(ctx, x, y, size) {
-        // Create a radial gradient
-        const gradient = ctx.createRadialGradient(x, y, 5, x, y, size);
-        gradient.addColorStop(0, "pink");
-        gradient.addColorStop(0.5, "lightblue");
-        gradient.addColorStop(1, "purple");
-
+      // Draw peace sign
+      function drawPeaceSign(ctx, x, y, radius, angle) {
         ctx.save();
         ctx.translate(x, y);
-        ctx.rotate(angle); // Slight rotation for some motion
+        ctx.rotate(angle); // Rotate the peace sign
         ctx.beginPath();
-        ctx.arc(0, 0, size, 0, 2 * Math.PI);
-        ctx.fillStyle = gradient;
-        ctx.fill();
+
+        // Outer circle
+        ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = "pink";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Vertical line
+        ctx.beginPath();
+        ctx.moveTo(0, -radius);
+        ctx.lineTo(0, radius);
+        ctx.stroke();
+
+        // Diagonal lines
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-radius * 0.7, radius * 0.7);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(radius * 0.7, radius * 0.7);
+        ctx.stroke();
+
         ctx.restore();
       }
 
-      function updateGradientCircle() {
-        angle += spinSpeed;
-        if (angle > 2 * Math.PI) angle = 0;
-      }
-
-      // Ball physics
+      // Update ball properties
       function updateBall() {
-        ball.dy += ball.gravity;
+        ball.dy += ball.gravity; // Apply gravity
         ball.y += ball.dy;
+
         if (ball.y + ball.radius >= canvas.height) {
-          ball.y = canvas.height - ball.radius;
-          ball.dy = -ball.dy * ball.bounceFactor;
+          ball.y = canvas.height - ball.radius; // Stop at the floor
+          ball.dy = -ball.dy * ball.bounceFactor; // Bounce with energy loss
         }
+
+        ball.angle += ball.spinSpeed; // Rotate peace sign
+        if (ball.angle > 2 * Math.PI) ball.angle = 0; // Reset rotation
       }
 
+      // Draw the ball and peace sign
       function drawBall(ctx) {
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
         ctx.fillStyle = "lavender";
         ctx.fill();
         ctx.closePath();
+
+        drawPeaceSign(ctx, ball.x, ball.y, ball.radius - 10, ball.angle);
       }
 
       // Paddle controls
@@ -99,8 +115,8 @@
         if (event.key === "ArrowDown") paddle1.move(5);
         if (event.key === "w" || event.key === "W") paddle2.move(-5);
         if (event.key === "s" || event.key === "S") paddle2.move(5);
-        if (event.key === "a" || event.key === "A") spinSpeed -= 0.01;
-        if (event.key === "d" || event.key === "D") spinSpeed += 0.01;
+        if (event.key === "a" || event.key === "A") ball.spinSpeed -= 0.01; // Slower rotation
+        if (event.key === "d" || event.key === "D") ball.spinSpeed += 0.01; // Faster rotation
       });
 
       // Paddle 1 follows mouse
@@ -115,14 +131,12 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         updateBall();
         drawBall(ctx);
-        updateGradientCircle();
-        drawGradientCircle(ctx, canvas.width / 2, canvas.height / 2, 40);
         paddle1.draw(ctx);
         paddle2.draw(ctx);
         requestAnimationFrame(updateCanvas);
       }
 
-      updateCanvas();
+      updateCanvas(); // Start animation loop
     </script>
   </body>
 </html>

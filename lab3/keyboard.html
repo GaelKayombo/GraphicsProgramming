@@ -1,77 +1,81 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <meta charset="UTF-8">
     <title>Canvas - Keyboard and Mouse Interaction</title>
     <style type="text/css">
-        canvas {
-            border: 1px solid grey;
-        }
+      canvas {
+        border: 1px solid grey;
+      }
     </style>
-</head>
-
-<body>
+  </head>
+  <body>
     <p>This is keyboard and mouse interaction.</p>
     <canvas id="canvas-for-ball" width="800" height="600"></canvas>
-
     <script type="text/javascript">
-        // Paddle Class Definition
-        class Paddle {
-            constructor(x, y, width, height, color) {
-                this.x = x;
-                this.y = y;
-                this.width = width;
-                this.height = height;
-                this.color = color;
-            }
-
-            // Draw the paddle on the canvas
-            draw(ctx) {
-                ctx.fillStyle = this.color;
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-            }
-
-            // Move the paddle up or down
-            move(dy) {
-                this.y += dy;
-            }
+      class Paddle {
+        constructor(x, y, width, height, color) {
+          this.x = x;
+          this.y = y;
+          this.width = width;
+          this.height = height;
+          this.color = color;
         }
 
-        // Initialize canvas and context
-        const canvas = document.getElementById("canvas-for-ball");
-        const ctx = canvas.getContext("2d");
-
-        // Create a paddle instance
-        const paddle = new Paddle(50, canvas.height / 2 - 30, 10, 60, "blue");
-
-        // Function to update the canvas
-        function updateCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-            paddle.draw(ctx); // Draw the paddle
+        draw(ctx) {
+          ctx.fillStyle = this.color;
+          ctx.fillRect(this.x, this.y, this.width, this.height);
         }
 
-        // Initial draw
-        updateCanvas();
+        move(dy) {
+          this.y += dy;
+        }
+      }
 
-        // Keyboard event listener for moving the paddle
-        document.addEventListener("keydown", function(event) {
-            if (event.key === "ArrowUp") {
-                paddle.move(-5); // Move paddle up
-            } else if (event.key === "ArrowDown") {
-                paddle.move(5); // Move paddle down
-            }
-            updateCanvas(); // Redraw the canvas with the updated paddle position
-        });
+      // Initialize canvas and context
+      const canvas = document.getElementById("canvas-for-ball");
+      const ctx = canvas.getContext("2d");
 
-        // Mouse movement event listener for paddle control
-        canvas.addEventListener("mousemove", function(event) {
-            const rect = canvas.getBoundingClientRect();
-            const mouseY = event.clientY - rect.top;
-            paddle.y = mouseY - paddle.height / 2; // Center the paddle on the mouse's y position
-            updateCanvas(); // Redraw the canvas with the updated paddle position
-        });
+      // Create two paddles
+      const paddle1 = new Paddle(50, canvas.height / 2 - 30, 10, 60, "blue");
+      const paddle2 = new Paddle(canvas.width - 60, canvas.height / 2 - 30, 10, 60, "red");
+
+      // Function to update the canvas
+      function updateCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+        paddle1.draw(ctx); // Draw paddle 1
+        paddle2.draw(ctx); // Draw paddle 2
+      }
+
+      // Initial draw
+      updateCanvas();
+
+      // Keyboard event listener for paddle control
+      document.addEventListener("keydown", function(event) {
+        // Paddle 1 (Arrow Keys)
+        if (event.key === "ArrowUp") {
+          paddle1.move(-5);
+        } else if (event.key === "ArrowDown") {
+          paddle1.move(5);
+        }
+
+        // Paddle 2 (W and S Keys)
+        if (event.key === "w" || event.key === "W") {
+          paddle2.move(-5);
+        } else if (event.key === "s" || event.key === "S") {
+          paddle2.move(5);
+        }
+
+        updateCanvas(); // Redraw the canvas with updated positions
+      });
+
+      // Mouse movement for paddle 1
+      canvas.addEventListener("mousemove", function(event) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseY = event.clientY - rect.top;
+        paddle1.y = mouseY - paddle1.height / 2;
+        updateCanvas(); // Redraw the canvas
+      });
     </script>
-</body>
-
+  </body>
 </html>

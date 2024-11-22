@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Canvas - Peace Sign Interaction</title>
+    <title>Canvas - Advanced Interaction with Peace Symbol</title>
     <style type="text/css">
       canvas {
         border: 1px solid grey;
@@ -10,7 +10,7 @@
     </style>
   </head>
   <body>
-    <p>This is an advanced interaction with a peace sign ball.</p>
+    <p>This is an advanced interaction example with a peace sign.</p>
     <canvas id="canvas-for-ball" width="800" height="600"></canvas>
     <script type="text/javascript">
       const canvas = document.getElementById("canvas-for-ball");
@@ -20,13 +20,74 @@
       let ball = {
         x: canvas.width / 2,
         y: 50,
-        radius: 40, // Increased size for peace sign visibility
+        radius: 30, // Slightly larger radius to fit the peace sign
         dy: 0,
         gravity: 0.5,
-        bounceFactor: 0.85,
-        angle: 0, // Rotation angle for the peace sign
-        spinSpeed: 0.05, // Peace sign rotation speed
+        bounceFactor: 0.85, // Energy loss on bounce
       };
+
+      let angle = 0; // For rotating the peace sign
+      let spinSpeed = 0.05;
+
+      // Draw the peace symbol inside the ball
+      function drawPeaceSign(ctx, x, y, radius) {
+        ctx.save(); // Save the canvas state
+        ctx.translate(x, y);
+        ctx.rotate(angle); // Rotate the peace sign
+        ctx.strokeStyle = "black"; // Peace sign color
+        ctx.lineWidth = 2;
+
+        // Outer circle
+        ctx.beginPath();
+        ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        // Vertical line
+        ctx.beginPath();
+        ctx.moveTo(0, -radius); // From top
+        ctx.lineTo(0, radius); // To bottom
+        ctx.stroke();
+
+        // Bottom diagonal lines
+        ctx.beginPath();
+        ctx.moveTo(0, 0); // Center
+        ctx.lineTo(-radius * 0.6, radius * 0.6); // Bottom left
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0); // Center
+        ctx.lineTo(radius * 0.6, radius * 0.6); // Bottom right
+        ctx.stroke();
+
+        ctx.restore(); // Restore canvas state
+      }
+
+      // Update peace sign rotation
+      function updatePeaceSign() {
+        angle += spinSpeed;
+        if (angle > 2 * Math.PI) angle = 0; // Reset angle
+      }
+
+      // Ball physics
+      function updateBall() {
+        ball.dy += ball.gravity;
+        ball.y += ball.dy;
+        if (ball.y + ball.radius >= canvas.height) {
+          ball.y = canvas.height - ball.radius;
+          ball.dy = -ball.dy * ball.bounceFactor; // Reverse direction and lose energy
+        }
+      }
+
+      function drawBall(ctx) {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = "pink"; // Ball color
+        ctx.fill();
+        ctx.closePath();
+
+        // Draw peace sign inside the ball
+        drawPeaceSign(ctx, ball.x, ball.y, ball.radius - 5);
+      }
 
       // Paddle setup
       class Paddle {
@@ -51,92 +112,35 @@
       const paddle1 = new Paddle(50, canvas.height / 2 - 30, 10, 60, "blue");
       const paddle2 = new Paddle(canvas.width - 60, canvas.height / 2 - 30, 10, 60, "red");
 
-      // Draw peace sign
-      function drawPeaceSign(ctx, x, y, radius, angle) {
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(angle); // Rotate the peace sign
-        ctx.beginPath();
-
-        // Outer circle
-        ctx.arc(0, 0, radius, 0, 2 * Math.PI);
-        ctx.strokeStyle = "pink";
-        ctx.lineWidth = 4;
-        ctx.stroke();
-
-        // Vertical line
-        ctx.beginPath();
-        ctx.moveTo(0, -radius);
-        ctx.lineTo(0, radius);
-        ctx.stroke();
-
-        // Diagonal lines
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(-radius * 0.7, radius * 0.7);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(radius * 0.7, radius * 0.7);
-        ctx.stroke();
-
-        ctx.restore();
-      }
-
-      // Update ball properties
-      function updateBall() {
-        ball.dy += ball.gravity; // Apply gravity
-        ball.y += ball.dy;
-
-        if (ball.y + ball.radius >= canvas.height) {
-          ball.y = canvas.height - ball.radius; // Stop at the floor
-          ball.dy = -ball.dy * ball.bounceFactor; // Bounce with energy loss
-        }
-
-        ball.angle += ball.spinSpeed; // Rotate peace sign
-        if (ball.angle > 2 * Math.PI) ball.angle = 0; // Reset rotation
-      }
-
-      // Draw the ball and peace sign
-      function drawBall(ctx) {
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
-        ctx.fillStyle = "lavender";
-        ctx.fill();
-        ctx.closePath();
-
-        drawPeaceSign(ctx, ball.x, ball.y, ball.radius - 10, ball.angle);
-      }
-
       // Paddle controls
       document.addEventListener("keydown", function (event) {
         if (event.key === "ArrowUp") paddle1.move(-5);
         if (event.key === "ArrowDown") paddle1.move(5);
         if (event.key === "w" || event.key === "W") paddle2.move(-5);
         if (event.key === "s" || event.key === "S") paddle2.move(5);
-        if (event.key === "a" || event.key === "A") ball.spinSpeed -= 0.01; // Slower rotation
-        if (event.key === "d" || event.key === "D") ball.spinSpeed += 0.01; // Faster rotation
+        if (event.key === "a" || event.key === "A") spinSpeed -= 0.01; // Slow down spin
+        if (event.key === "d" || event.key === "D") spinSpeed += 0.01; // Speed up spin
       });
 
       // Paddle 1 follows mouse
       canvas.addEventListener("mousemove", function (event) {
         const rect = canvas.getBoundingClientRect();
         const mouseY = event.clientY - rect.top;
-        paddle1.y = mouseY - paddle1.height / 2;
+        paddle1.y = mouseY - paddle1.height / 2; // Center paddle on mouse
       });
 
       // Redraw everything
       function updateCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         updateBall();
-        drawBall(ctx);
+        drawBall(ctx); // Ball with peace sign
+        updatePeaceSign();
         paddle1.draw(ctx);
         paddle2.draw(ctx);
         requestAnimationFrame(updateCanvas);
       }
 
-      updateCanvas(); // Start animation loop
+      updateCanvas(); // Start animation
     </script>
   </body>
 </html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Lab 4 - Paddle and Ball Collision</title>
+    <title>Lab 4 - Collisions and Advanced Features</title>
 </head>
 <body>
     <canvas id="gameCanvas" width="800" height="600" style="border:1px solid black;"></canvas>
@@ -11,57 +11,91 @@
         const ctx = canvas.getContext("2d");
 
         // Ball and Paddle settings
-        let ball = {
-            x: 400, y: 300, radius: 15, dx: 4, dy: -4, color: "black"
+        class Ball {
+            constructor(x, y, radius, dx, dy, color) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.dx = dx;
+                this.dy = dy;
+                this.color = color;
+            }
+
+            draw() {
+                // Draw ball
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+
+                // Advanced symbol: Peace sign
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y - this.radius + 3);
+                ctx.lineTo(this.x, this.y + this.radius - 3);
+                ctx.moveTo(this.x - this.radius / 2, this.y);
+                ctx.lineTo(this.x, this.y + this.radius / 2);
+                ctx.moveTo(this.x + this.radius / 2, this.y);
+                ctx.lineTo(this.x, this.y + this.radius / 2);
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.closePath();
+            }
+
+            move() {
+                this.x += this.dx;
+                this.y += this.dy;
+            }
+
+            bounceWall() {
+                if (this.x + this.dx > canvas.width - this.radius || this.x + this.dx < this.radius) {
+                    this.dx = -this.dx;
+                }
+                if (this.y + this.dy < this.radius) {
+                    this.dy = -this.dy;
+                }
+            }
+
+            missed() {
+                return this.y + this.dy > canvas.height - this.radius;
+            }
+        }
+
+        const paddle = {
+            x: canvas.width / 2,
+            y: canvas.height - 20,
+            radius: 30,
+            color: "blue",
+            score: 0,
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+            }
         };
-        let paddle = {
-            x: 400, y: 580, radius: 30, color: "blue", score: 0
-        };
+
+        let balls = [
+            new Ball(400, 300, 15, 3, -3, "red")
+        ]; // Array of balls
         let collisionCount = 0;
 
-        // Draw the paddle as a circle
-        function drawPaddle() {
-            ctx.beginPath();
-            ctx.arc(paddle.x, paddle.y, paddle.radius, 0, Math.PI * 2);
-            ctx.fillStyle = paddle.color;
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        // Draw the ball with a white peace symbol
-        function drawBall() {
-            // Ball circle
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-            ctx.fillStyle = ball.color;
-            ctx.fill();
-            ctx.closePath();
-
-            // Peace symbol (white lines)
-            ctx.beginPath();
-            ctx.moveTo(ball.x, ball.y - ball.radius + 3); // Vertical line
-            ctx.lineTo(ball.x, ball.y + ball.radius - 3);
-            ctx.moveTo(ball.x - ball.radius / 2, ball.y); // Left diagonal
-            ctx.lineTo(ball.x, ball.y + ball.radius / 2);
-            ctx.moveTo(ball.x + ball.radius / 2, ball.y); // Right diagonal
-            ctx.lineTo(ball.x, ball.y + ball.radius / 2);
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.closePath();
-        }
-
-        // Detect collision between paddle and ball
-        function detectCollision() {
+        // Detect collision with paddle
+        function detectCollision(ball) {
             const distX = ball.x - paddle.x;
             const distY = ball.y - paddle.y;
             const distance = Math.sqrt(distX * distX + distY * distY);
 
             if (distance < ball.radius + paddle.radius) {
-                ball.dy = -ball.dy; // Bounce the ball
+                ball.dy = -ball.dy; // Bounce ball
                 collisionCount++;
-                paddle.score++; // Increment paddle score
+                paddle.score++; // Increment score
+                return true;
             }
+            return false;
         }
 
         // Display collision count and scores
@@ -69,44 +103,70 @@
             ctx.font = "20px Arial";
             ctx.fillStyle = "black";
             ctx.fillText("Collisions: " + collisionCount, 10, 20);
-            ctx.fillText("Paddle Score: " + paddle.score, 10, 50);
+            ctx.fillText("Score: " + paddle.score, 10, 50);
         }
 
-        // Update ball speed based on keyboard input (Lab 3)
-        window.addEventListener("keydown", (e) => {
-            if (e.key === "ArrowUp") ball.dy -= 1;
-            if (e.key === "ArrowDown") ball.dy += 1;
-            if (e.key === "ArrowLeft") ball.dx -= 1;
-            if (e.key === "ArrowRight") ball.dx += 1;
+        // Add or remove balls on double-click
+        canvas.addEventListener("dblclick", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            // Check if a ball was clicked, remove it
+            let ballClicked = false;
+            balls = balls.filter((ball) => {
+                const dist = Math.sqrt((mouseX - ball.x) ** 2 + (mouseY - ball.y) ** 2);
+                if (dist < ball.radius) {
+                    ballClicked = true;
+                    return false;
+                }
+                return true;
+            });
+
+            // If no ball was clicked, add a new ball
+            if (!ballClicked) {
+                balls.push(
+                    new Ball(
+                        mouseX,
+                        mouseY,
+                        15,
+                        Math.random() * 4 - 2,
+                        Math.random() * 4 - 2,
+                        "rgb(" + Math.random() * 255 + "," + Math.random() * 255 + "," + Math.random() * 255 + ")"
+                    )
+                );
+            }
         });
 
-        // Update and draw everything
+        // Keyboard controls to adjust ball speed
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowUp") balls.forEach(ball => ball.dy -= 1);
+            if (e.key === "ArrowDown") balls.forEach(ball => ball.dy += 1);
+            if (e.key === "ArrowLeft") balls.forEach(ball => ball.dx -= 1);
+            if (e.key === "ArrowRight") balls.forEach(ball => ball.dx += 1);
+        });
+
+        // Update game state
         function update() {
             ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
 
-            drawPaddle();
-            drawBall();
+            paddle.draw();
             displayStats();
-            detectCollision();
 
-            // Ball movement
-            ball.x += ball.dx;
-            ball.y += ball.dy;
+            balls.forEach((ball) => {
+                ball.draw();
+                ball.move();
+                ball.bounceWall();
 
-            // Ball-wall collisions
-            if (ball.x + ball.dx > canvas.width - ball.radius || ball.x + ball.dx < ball.radius) {
-                ball.dx = -ball.dx;
-            }
-            if (ball.y + ball.dy < ball.radius) {
-                ball.dy = -ball.dy;
-            }
+                if (detectCollision(ball)) {
+                    console.log("Collision detected!");
+                }
 
-            // If the ball hits the back wall, decrement the score
-            if (ball.y + ball.dy > canvas.height - ball.radius) {
-                console.log("Ball missed!");
-                paddle.score--; // Lose score
-                document.location.reload(); // Restart game for now
-            }
+                if (ball.missed()) {
+                    console.log("Missed a ball!");
+                    paddle.score--; // Decrease score for missing a ball
+                }
+            });
 
             requestAnimationFrame(update); // Repeat the loop
         }

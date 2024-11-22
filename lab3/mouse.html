@@ -21,9 +21,9 @@
         x: canvas.width / 2,
         y: 50,
         radius: 10,
-        dy: 0, // Ball's vertical speed
-        gravity: 0.5, // Acceleration due to gravity
-        bounceFactor: 0.9, // Reduces bounce height each time
+        dy: 0,
+        gravity: 0.5,
+        bounceFactor: 0.85, // Slightly more energy loss for realism
       };
 
       // Paddle setup
@@ -46,25 +46,37 @@
         }
       }
 
-      // Create paddles
       const paddle1 = new Paddle(50, canvas.height / 2 - 30, 10, 60, "blue");
       const paddle2 = new Paddle(canvas.width - 60, canvas.height / 2 - 30, 10, 60, "red");
 
-      // Rotating symbol setup
+      // Girly rotating symbol
       let angle = 0;
-      let spinSpeed = 0.05; // Initial speed of rotation
+      let spinSpeed = 0.05;
+      let wobble = 0; // For imperfection
+      let wobbleSpeed = 0.02;
 
       function drawSymbol(ctx, x, y, size) {
-        ctx.save(); // Save canvas state
-        ctx.translate(x, y); // Move origin to the symbol's position
-        ctx.rotate(angle); // Rotate the canvas
-        ctx.fillStyle = "purple";
-        ctx.fillRect(-size / 2, -size / 2, size, size); // Draw square
-        ctx.restore(); // Restore canvas state
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle + wobble); // Add slight wobble to rotation
+        ctx.fillStyle = "pink";
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+          const outerX = Math.cos((i * 2 * Math.PI) / 5) * size;
+          const outerY = Math.sin((i * 2 * Math.PI) / 5) * size;
+          const innerX = Math.cos(((i + 0.5) * 2 * Math.PI) / 5) * (size / 2);
+          const innerY = Math.sin(((i + 0.5) * 2 * Math.PI) / 5) * (size / 2);
+          ctx.lineTo(outerX, outerY);
+          ctx.lineTo(innerX, innerY);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
       }
 
       function updateSymbol() {
         angle += spinSpeed;
+        wobble = Math.sin(wobbleSpeed * Date.now() * 0.002) * 0.1; // Wobble effect
         if (angle > 2 * Math.PI) angle = 0;
       }
 
@@ -73,39 +85,34 @@
         ball.dy += ball.gravity;
         ball.y += ball.dy;
         if (ball.y + ball.radius >= canvas.height) {
-          ball.y = canvas.height - ball.radius; // Keep it above the floor
-          ball.dy = -ball.dy * ball.bounceFactor; // Reverse and reduce speed
+          ball.y = canvas.height - ball.radius;
+          ball.dy = -ball.dy * ball.bounceFactor;
         }
       }
 
       function drawBall(ctx) {
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
-        ctx.fillStyle = "red";
+        ctx.fillStyle = "lavender";
         ctx.fill();
         ctx.closePath();
       }
 
       // Paddle controls
       document.addEventListener("keydown", function (event) {
-        // Controls for paddle 1
         if (event.key === "ArrowUp") paddle1.move(-5);
         if (event.key === "ArrowDown") paddle1.move(5);
-
-        // Controls for paddle 2
         if (event.key === "w" || event.key === "W") paddle2.move(-5);
         if (event.key === "s" || event.key === "S") paddle2.move(5);
-
-        // Spin controls for the symbol
         if (event.key === "a" || event.key === "A") spinSpeed -= 0.01;
         if (event.key === "d" || event.key === "D") spinSpeed += 0.01;
       });
 
-      // Paddle 1 follows mouse movement
+      // Paddle 1 follows mouse
       canvas.addEventListener("mousemove", function (event) {
         const rect = canvas.getBoundingClientRect();
         const mouseY = event.clientY - rect.top;
-        paddle1.y = mouseY - paddle1.height / 2; // Center paddle on mouse
+        paddle1.y = mouseY - paddle1.height / 2;
       });
 
       // Redraw everything
@@ -117,10 +124,10 @@
         drawSymbol(ctx, canvas.width / 2, canvas.height / 2, 40);
         paddle1.draw(ctx);
         paddle2.draw(ctx);
-        requestAnimationFrame(updateCanvas); // Keep updating
+        requestAnimationFrame(updateCanvas);
       }
 
-      updateCanvas(); // Start the animation loop
+      updateCanvas();
     </script>
   </body>
 </html>

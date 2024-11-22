@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Lab 3 - Combined Interactions</title>
+    <style type="text/css">
+      canvas {
+        border: 2px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Lab 3 - All Interactions</h1>
+    <canvas id="canvas-for-lab3" width="800" height="600"></canvas>
+    <script type="text/javascript">
+      const canvas = document.getElementById("canvas-for-lab3");
+      const ctx = canvas.getContext("2d");
+
+      // Ball with peace sign
+      class Ball {
+        constructor(x, y, radius, xVelocity, yVelocity, color) {
+          this.x = x;
+          this.y = y;
+          this.radius = radius;
+          this.xVelocity = xVelocity;
+          this.yVelocity = yVelocity;
+          this.color = color;
+          this.angle = 0;
+          this.rotationSpeed = 0.05;
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+          ctx.closePath();
+
+          this.drawPeaceSign();
+        }
+
+        drawPeaceSign() {
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = 2;
+
+          // Peace sign outer circle
+          ctx.beginPath();
+          ctx.arc(0, 0, this.radius - 10, 0, 2 * Math.PI);
+          ctx.stroke();
+
+          // Peace sign lines
+          this.drawPolarLine(0, this.radius - 10, Math.PI / 2); // Vertical
+          this.drawPolarLine(0, this.radius - 10, (3 * Math.PI) / 4); // Left
+          this.drawPolarLine(0, this.radius - 10, Math.PI / 4); // Right
+
+          ctx.restore();
+        }
+
+        drawPolarLine(startRadius, endRadius, angle) {
+          const startX = startRadius * Math.cos(angle);
+          const startY = startRadius * Math.sin(angle);
+          const endX = endRadius * Math.cos(angle);
+          const endY = endRadius * Math.sin(angle);
+
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          ctx.lineTo(endX, endY);
+          ctx.stroke();
+        }
+
+        move() {
+          this.x += this.xVelocity;
+          this.y += this.yVelocity;
+
+          // Bounce off edges
+          if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+            this.xVelocity = -this.xVelocity;
+            this.reverseRotation();
+          }
+
+          if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+            this.yVelocity = -this.yVelocity;
+            this.reverseRotation();
+          }
+
+          this.angle += this.rotationSpeed;
+        }
+
+        reverseRotation() {
+          this.rotationSpeed = -this.rotationSpeed;
+        }
+      }
+
+      // Paddle setup
+      class Paddle {
+        constructor(x, y, width, height, color) {
+          this.x = x;
+          this.y = y;
+          this.width = width;
+          this.height = height;
+          this.color = color;
+        }
+
+        draw() {
+          ctx.fillStyle = this.color;
+          ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+
+        move(dy) {
+          this.y += dy;
+        }
+      }
+
+      const ball = new Ball(
+        canvas.width / 2,
+        canvas.height / 2,
+        40,
+        3,
+        2,
+        "pink"
+      );
+
+      const paddle1 = new Paddle(50, canvas.height / 2 - 30, 10, 60, "blue");
+      const paddle2 = new Paddle(
+        canvas.width - 60,
+        canvas.height / 2 - 30,
+        10,
+        60,
+        "red"
+      );
+
+      // Mouse interaction (draw a dot where clicked)
+      canvas.addEventListener("click", function (event) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const mouseY = event.clientY - rect.top;
+
+        ctx.beginPath();
+        ctx.arc(mouseX, mouseY, 6, 0, 2 * Math.PI);
+        ctx.fillStyle = "red";
+        ctx.fill();
+      });
+
+      // Keyboard controls for paddles
+      document.addEventListener("keydown", function (event) {
+        // Paddle 1 (Arrow keys)
+        if (event.key === "ArrowUp") paddle1.move(-5);
+        if (event.key === "ArrowDown") paddle1.move(5);
+
+        // Paddle 2 (W/S keys)
+        if (event.key === "w" || event.key === "W") paddle2.move(-5);
+        if (event.key === "s" || event.key === "S") paddle2.move(5);
+      });
+
+      // Mouse movement to control paddle1
+      canvas.addEventListener("mousemove", function (event) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseY = event.clientY - rect.top;
+        paddle1.y = mouseY - paddle1.height / 2;
+      });
+
+      // Animation loop
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ball.move();
+        ball.draw();
+        paddle1.draw();
+        paddle2.draw();
+        requestAnimationFrame(animate);
+      }
+
+      animate(); // Start animation
+    </script>
+  </body>
+</html>

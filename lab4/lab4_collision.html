@@ -12,7 +12,7 @@
 
         // Ball and Paddle settings
         let ball = {
-            x: 400, y: 300, radius: 15, dx: 4, dy: -4, color: "red"
+            x: 400, y: 300, radius: 15, dx: 4, dy: -4, color: "black"
         };
         let paddle = {
             x: 400, y: 580, radius: 30, color: "blue", score: 0
@@ -28,21 +28,27 @@
             ctx.closePath();
         }
 
-        // Draw the ball (with symbol from Lab 2/3)
+        // Draw the ball with a white peace symbol
         function drawBall() {
+            // Ball circle
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
             ctx.fillStyle = ball.color;
             ctx.fill();
             ctx.closePath();
-            // Add a peace symbol in the ball for Lab 2/3 integration
+
+            // Peace symbol (white lines)
             ctx.beginPath();
-            ctx.moveTo(ball.x, ball.y - ball.radius / 2);
+            ctx.moveTo(ball.x, ball.y - ball.radius + 3); // Vertical line
+            ctx.lineTo(ball.x, ball.y + ball.radius - 3);
+            ctx.moveTo(ball.x - ball.radius / 2, ball.y); // Left diagonal
             ctx.lineTo(ball.x, ball.y + ball.radius / 2);
-            ctx.moveTo(ball.x - ball.radius / 2, ball.y);
-            ctx.lineTo(ball.x + ball.radius / 2, ball.y);
+            ctx.moveTo(ball.x + ball.radius / 2, ball.y); // Right diagonal
+            ctx.lineTo(ball.x, ball.y + ball.radius / 2);
             ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
             ctx.stroke();
+            ctx.closePath();
         }
 
         // Detect collision between paddle and ball
